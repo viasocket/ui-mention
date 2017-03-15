@@ -23,10 +23,10 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   var _this2 = this;
 
   // Beginning of input or preceeded by spaces: @sometext
-  this.delimiter = '@';
+  this.delimiter = '$';
 
   // this.pattern is left for backward compatibility
-  this.searchPattern = this.pattern || new RegExp("(?:\\s+|^)" + this.delimiter + "(\\w+(?: \\w+)?)$");
+  this.searchPattern = this.pattern || new RegExp("(?:\\s+|^)\\" + this.delimiter + "(\[A-Za-z0-9._-]*(?: \\w+)?)$");
 
   this.decodePattern = new RegExp(this.delimiter + "\[[\\s\\w]+:[0-9a-z-]+\]", "gi");
 
@@ -138,7 +138,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @return {string}              HTML highlighted version of the choice
    */
   this.highlight = function (choice) {
-    return '<span>' + this.label(choice) + '</span>';
+    return '' + this.label(choice);
   };
 
   /**
@@ -163,7 +163,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @return {string}              Human-readable string version of choice
    */
   this.label = function (choice) {
-    return choice.first + ' ' + choice.last;
+    return '' + choice.label;
   };
 
   /**
@@ -175,7 +175,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @return {string}              Syntax-encoded string version of choice
    */
   this.encode = function (choice) {
-    return this.delimiter + '[' + this.label(choice) + ':' + choice.id + ']';
+    return '' + this.delimiter + this.label(choice);
   };
 
   /**
@@ -194,7 +194,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
     // TODO: come up with a better way to detect what to remove
     // TODO: consider alternative to using regex match
-    text = text.substr(0, search.index + search[0].indexOf(this.delimiter)) + this.label(mention) + ' ' + text.substr(search.index + search[0].length);
+    text = text.substr(0, search.index + search[0].indexOf(this.delimiter)) + this.label(mention) + text.substr(search.index + search[0].length);
     return text;
   };
 
