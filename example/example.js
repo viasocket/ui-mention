@@ -2,7 +2,7 @@
 
 angular.module('example', ['ui.mention']).run(function ($rootScope) {
   $rootScope.post = {
-    message: 'hi there @k'
+    message: 'hi there $k'
   };
 }).directive('mentionExample', function () {
   return {
@@ -17,19 +17,13 @@ angular.module('example', ['ui.mention']).run(function ($rootScope) {
        */
       uiMention.findChoices = function (match, mentions) {
         return choices
-        // Remove items that are already mentioned
-        .filter(function (choice) {
-          return !mentions.some(function (mention) {
-            return mention.id === choice.id;
-          });
-        })
         // Matches items from search query
         .filter(function (choice) {
-          return ~(choice.first + ' ' + choice.last).indexOf(match[1]);
+          return ~(choice.label).indexOf(match[1]);
         });
       };
     }
   };
 });
 
-var choices = [{ first: 'bob', last: 'barker', id: 11123 }, { first: 'kenny', last: 'logins', id: '123ab-123' }, { first: 'kyle', last: 'corn', id: '123' }, { first: 'steve', last: 'rodriguez', id: 'hi' }, { first: 'steve', last: 'holt', id: '0-9' }, { first: 'megan', last: 'burgerpants', id: 'ab-' }];
+var choices = [{label: 'bob mare' }, { label: 'kenny' }, { label: 'kyle$' }, { label: 'kyle' }, {  label: 'steve' }, { label: 'steve.hello' }];
