@@ -137,7 +137,7 @@ angular.module('ui.mention')
    * @return {string}              Human-readable string version of choice
    */
   this.label = function(choice) {
-    return `${choice.label}`;
+    return `${this.delimiter}${choice.label}`;
   };
 
   /**

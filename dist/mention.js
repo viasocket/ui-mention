@@ -163,7 +163,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @return {string}              Human-readable string version of choice
    */
   this.label = function (choice) {
-    return '' + choice.label;
+    return '' + this.delimiter + choice.label;
   };
 
   /**
