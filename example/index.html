@@ -24,14 +24,6 @@
       ng-trim="false"
       ></textarea>
     <div class="mention-highlight"></div>
-
-    <ul ng-if="$mention.choices.length" class="dropdown">
-      <li ng-repeat="choice in $mention.choices" ng-class="{active:$mention.activeChoice==choice}">
-        <a ng-click="$mention.select(choice)">
-          {{::choice.label}}
-        </a>
-      </li>
-    </ul>
   </div>
 
   <input ng-model="newValue" placeholder="New Value"><button ng-click="post.message=newValue">Set Value</button><br>

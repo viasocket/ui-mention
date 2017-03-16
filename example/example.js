@@ -2,7 +2,7 @@
 
 angular.module('example', ['ui.mention']).run(function ($rootScope) {
   $rootScope.post = {
-    message: 'hi there $k'
+    message: ''
   };
 }).directive('mentionExample', function () {
   return {

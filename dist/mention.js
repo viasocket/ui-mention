@@ -19,8 +19,8 @@ angular.module('ui.mention', []).directive('uiMention', function () {
 });
 'use strict';
 
-angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$attrs", "$q", "$timeout", "$document", function ($element, $scope, $attrs, $q, $timeout, $document) {
-  var _this2 = this;
+angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$attrs", "$q", "$timeout", "$document", "$compile", function ($element, $scope, $attrs, $q, $timeout, $document, $compile) {
+  var _this3 = this;
 
   // Beginning of input or preceeded by spaces: @sometext
   this.delimiter = '$';
@@ -31,6 +31,10 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   this.decodePattern = new RegExp(this.delimiter + "\[[\\s\\w]+:[0-9a-z-]+\]", "gi");
 
   this.$element = $element;
+  this.$compile = $compile;
+  this.$scope = $scope;
+  this.$attrs = $attrs;
+
   this.choices = [];
   this.mentions = [];
   var ngModel;
@@ -43,7 +47,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @param  {ngModelController} model
    */
   this.init = function (model) {
-    var _this = this;
+    var _this2 = this;
 
     // Leading whitespace shows up in the textarea but not the preview
     $attrs.ngTrim = 'false';
@@ -52,11 +56,11 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
     ngModel.$parsers.push(function (value) {
       // Removes any mentions that aren't used
-      _this.mentions = _this.mentions.filter(function (mention) {
-        if (~value.indexOf(_this.label(mention))) return value = value.replace(_this.label(mention), _this.encode(mention));
+      _this2.mentions = _this2.mentions.filter(function (mention) {
+        if (~value.indexOf(_this2.label(mention))) return value = value.replace(_this2.label(mention), _this2.encode(mention));
       });
 
-      _this.render(value);
+      _this2.render(value);
 
       return value;
     });
@@ -68,9 +72,9 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
       value = value.toString();
 
       // Removes any mentions that aren't used
-      _this.mentions = _this.mentions.filter(function (mention) {
-        if (~value.indexOf(_this.encode(mention))) {
-          value = value.replace(_this.encode(mention), _this.label(mention));
+      _this2.mentions = _this2.mentions.filter(function (mention) {
+        if (~value.indexOf(_this2.encode(mention))) {
+          value = value.replace(_this2.encode(mention), _this2.label(mention));
           return true;
         } else {
           return false;
@@ -82,8 +86,8 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
     ngModel.$render = function () {
       $element.val(ngModel.$viewValue || '');
-      $timeout(_this.autogrow, true);
-      _this.render();
+      $timeout(_this2.autogrow, true);
+      _this2.render();
     };
   };
 
@@ -111,10 +115,10 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
     html = (html || '').toString();
     // Convert input to text, to prevent script injection/rich text
     html = parseContentAsText(html);
-    _this2.mentions.forEach(function (mention) {
-      html = html.replace(_this2.encode(mention), _this2.highlight(mention));
+    _this3.mentions.forEach(function (mention) {
+      html = html.replace(_this3.encode(mention), _this3.highlight(mention));
     });
-    _this2.renderElement().html(html);
+    _this3.renderElement().html(html);
     return html;
   };
 
@@ -263,13 +267,13 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @todo Try to avoid using a regex match object
    */
   this.search = function (match) {
-    var _this3 = this;
+    var _this4 = this;
 
     this.searching = match;
 
     return $q.when(this.findChoices(match, this.mentions)).then(function (choices) {
-      _this3.choices = choices;
-      _this3.activeChoice = choices[0];
+      _this4.choices = choices;
+      _this4.activeChoice = choices[0];
       return choices;
     });
   };
@@ -303,19 +307,19 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   };
 
   // Interactions to trigger searching
-  $element.on('keyup click focus', function (event) {
+  $element.on('keyup', function (event) {
     // If event is fired AFTER activeChoice move is performed
-    if (_this2.moved) return _this2.moved = false;
+    if (_this3.moved) return _this3.moved = false;
     // Don't trigger on selection
     if ($element[0].selectionStart != $element[0].selectionEnd) return;
     var text = $element.val();
     // text to left of cursor ends with `@sometext`
-    var match = _this2.searchPattern.exec(text.substr(0, $element[0].selectionStart));
+    var match = _this3.searchPattern.exec(text.substr(0, $element[0].selectionStart));
 
     if (match) {
-      _this2.search(match);
+      appendTemplate(_this3.search(match), _this3, getTextBoundingRect($element[0], $element[0].selectionStart, $element[0].selectionEnd, false));
     } else {
-      _this2.cancel();
+      _this3.cancel();
     }
 
     if (!$scope.$$phase) {
@@ -324,27 +328,27 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   });
 
   $element.on('keydown', function (event) {
-    if (!_this2.searching) return;
+    if (!_this3.searching) return;
 
     switch (event.keyCode) {
       case 13:
         // return
-        _this2.select();
+        _this3.select();
         break;
       case 38:
         // up
-        _this2.up();
+        _this3.up();
         break;
       case 40:
         // down
-        _this2.down();
+        _this3.down();
         break;
       default:
         // Exit function
         return;
     }
 
-    _this2.moved = true;
+    _this3.moved = true;
     event.preventDefault();
 
     if (!$scope.$$phase) {
@@ -353,7 +357,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   });
 
   this.onMouseup = (function (event) {
-    var _this4 = this;
+    var _this5 = this;
 
     if (event.target == $element[0]) return;
 
@@ -363,12 +367,12 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
     // Let ngClick fire first
     $scope.$evalAsync(function () {
-      _this4.cancel();
+      _this5.cancel();
     });
   }).bind(this);
 
   $element.on('focus', function (event) {
-    $document.on('mouseup', _this2.onMouseup);
+    $document.on('mouseup', _this3.onMouseup);
   });
 
   // Autogrow is mandatory beacuse the textarea scrolls away from highlights
@@ -376,4 +380,126 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
   // Initialize autogrow height
   $timeout(this.autogrow, true);
+
+  function getTextBoundingRect(input, selectionStart, selectionEnd, debug) {
+    // Basic parameter validation
+    if (!input || !('value' in input)) return input;
+    if (typeof selectionStart == "string") selectionStart = parseFloat(selectionStart);
+    if (typeof selectionStart != "number" || isNaN(selectionStart)) {
+      selectionStart = 0;
+    }
+    if (selectionStart < 0) selectionStart = 0;else selectionStart = Math.min(input.value.length, selectionStart);
+    if (typeof selectionEnd == "string") selectionEnd = parseFloat(selectionEnd);
+    if (typeof selectionEnd != "number" || isNaN(selectionEnd) || selectionEnd < selectionStart) {
+      selectionEnd = selectionStart;
+    }
+    if (selectionEnd < 0) selectionEnd = 0;else selectionEnd = Math.min(input.value.length, selectionEnd);
+
+    // If available (thus IE), use the createTextRange method
+    if (typeof input.createTextRange == "function") {
+      var range = input.createTextRange();
+      range.collapse(true);
+      range.moveStart('character', selectionStart);
+      range.moveEnd('character', selectionEnd - selectionStart);
+      return range.getBoundingClientRect();
+    }
+    // createTextRange is not supported, create a fake text range
+    var offset = getInputOffset(),
+        topPos = offset.top,
+        leftPos = offset.left,
+        width = getInputCSS('width', true),
+        height = getInputCSS('height', true);
+
+    // Styles to simulate a node in an input field
+    // use pre-wrap instead of wrap for white-space to support wrapping in textareas
+    var cssDefaultStyles = "white-space:pre-wrap;padding:0;margin:0;",
+        listOfModifiers = ['direction', 'font-family', 'font-size', 'font-size-adjust', 'font-variant', 'font-weight', 'font-style', 'letter-spacing', 'line-height', 'text-align', 'text-indent', 'text-transform', 'word-wrap', 'word-spacing'];
+
+    topPos += getInputCSS('padding-top', true);
+    topPos += getInputCSS('border-top-width', true);
+    leftPos += getInputCSS('padding-left', true);
+    leftPos += getInputCSS('border-left-width', true);
+    leftPos += 1; //Seems to be necessary
+
+    for (var i = 0; i < listOfModifiers.length; i++) {
+      var property = listOfModifiers[i];
+      cssDefaultStyles += property + ':' + getInputCSS(property) + ';';
+    }
+    // End of CSS variable checks
+
+    var text = input.value,
+        textLen = text.length,
+        fakeClone = document.createElement("div");
+    if (selectionStart > 0) appendPart(0, selectionStart);
+    var fakeRange = appendPart(selectionStart, selectionEnd);
+    if (textLen > selectionEnd) appendPart(selectionEnd, textLen);
+
+    // Styles to inherit the font styles of the element
+    fakeClone.style.cssText = cssDefaultStyles;
+
+    // Styles to position the text node at the desired position
+    fakeClone.style.position = "absolute";
+    fakeClone.style.top = topPos + "px";
+    fakeClone.style.left = leftPos + "px";
+    fakeClone.style.width = width + "px";
+    fakeClone.style.height = height + "px";
+    document.body.appendChild(fakeClone);
+    var returnValue = fakeRange.getBoundingClientRect(); //Get rect
+
+    if (!debug) fakeClone.parentNode.removeChild(fakeClone); //Remove temp
+    return returnValue;
+
+    // Local functions for readability of the previous code
+    function appendPart(start, end) {
+      var span = document.createElement("span"),
+          tmpText = text.substring(start, end);
+      span.style.cssText = cssDefaultStyles; //Force styles to prevent unexpected results
+      // add a space if it ends in a newline
+      if (/[\n\r]$/.test(tmpText)) {
+        tmpText += ' ';
+      }
+      span.textContent = tmpText;
+      fakeClone.appendChild(span);
+      return span;
+    }
+    // Computing offset position
+    function getInputOffset() {
+      var body = document.body,
+          win = document.defaultView,
+          docElem = document.documentElement,
+          box = document.createElement('div');
+      box.style.paddingLeft = box.style.width = "1px";
+      body.appendChild(box);
+      var isBoxModel = box.offsetWidth == 2;
+      body.removeChild(box);
+      box = input.getBoundingClientRect();
+      var clientTop = docElem.clientTop || body.clientTop || 0,
+          clientLeft = docElem.clientLeft || body.clientLeft || 0,
+          scrollTop = win.pageYOffset || isBoxModel && docElem.scrollTop || body.scrollTop,
+          scrollLeft = win.pageXOffset || isBoxModel && docElem.scrollLeft || body.scrollLeft;
+      return {
+        top: box.top + scrollTop - clientTop,
+        left: box.left + scrollLeft - clientLeft };
+    }
+    function getInputCSS(prop, isnumber) {
+      var val = document.defaultView.getComputedStyle(input, null).getPropertyValue(prop);
+      return isnumber ? parseFloat(val) : val;
+    }
+  }
+
+  function appendTemplate(choices, _this, coordinates) {
+    var html = '<ul ng-if="$mention.choices.length" class="dropdown">\
+      <li ng-repeat="choice in $mention.choices" ng-class="{active:$mention.activeChoice==choice}">\
+        <a ng-click="$mention.select(choice)">\
+          {{choice.label}}\
+        </a>\
+      </li>\
+    </ul>';
+
+    var element = angular.element(html);
+    // if ($document[0].querySelector('.dropdown')) $document[0].querySelector('.dropdown');
+    element.css({ display: "block", visibility: "visible", left: coordinates.left + 'px', top: coordinates.top + 'px', width: 0 });
+    angular.element($document[0].querySelector('.mention-container')).append(element);
+    _this.$compile(element)(_this.$scope);
+  }
 }]);
