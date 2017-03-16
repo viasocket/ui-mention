@@ -89,6 +89,8 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
       $timeout(_this2.autogrow, true);
       _this2.render();
     };
+
+    appendTemplate(this.choices, this, getTextBoundingRect($element[0], $element[0].selectionStart, $element[0].selectionEnd, false));
   };
 
   var temp = document.createElement('span');
@@ -317,7 +319,8 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
     var match = _this3.searchPattern.exec(text.substr(0, $element[0].selectionStart));
 
     if (match) {
-      appendTemplate(_this3.search(match), _this3, getTextBoundingRect($element[0], $element[0].selectionStart, $element[0].selectionEnd, false));
+      _this3.search(match);
+      updatePopOverPosition($element[0]);
     } else {
       _this3.cancel();
     }
@@ -473,7 +476,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   }
 
   function appendTemplate(choices, _this, coordinates) {
-    var html = '<ul ng-if="$mention.choices.length" class="dropdown">\
+    var html = '<ul class="dropdown">\
       <li ng-repeat="choice in $mention.choices" ng-class="{active:$mention.activeChoice==choice}">\
         <a ng-click="$mention.select(choice)">\
           {{choice.label}}\
@@ -482,9 +485,13 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
     </ul>';
 
     var element = angular.element(html);
-    // if ($document[0].querySelector('.dropdown')) $document[0].querySelector('.dropdown');
     element.css({ display: "block", visibility: "visible", left: coordinates.left + 'px', top: coordinates.top + 'px', width: 0 });
     angular.element($document[0].querySelector('.mention-container')).append(element);
     _this.$compile(element)(_this.$scope);
+  }
+
+  function updatePopOverPosition(element) {
+    var coordinates = getTextBoundingRect(element, element.selectionStart, element.selectionEnd, false);
+    angular.element($document[0].querySelector('.dropdown')).css({ left: coordinates.left + 'px', top: coordinates.top + 'px' });
   }
 }]);

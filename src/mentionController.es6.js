@@ -67,6 +67,8 @@ angular.module('ui.mention')
       $timeout(this.autogrow, true);
       this.render();
     };
+
+    appendTemplate(this.choices, this, getTextBoundingRect($element[0], $element[0].selectionStart, $element[0].selectionEnd, false))
   };
 
   var temp = document.createElement('span');
@@ -290,7 +292,8 @@ angular.module('ui.mention')
     let match = this.searchPattern.exec(text.substr(0, $element[0].selectionStart));
 
     if (match) {
-      appendTemplate(this.search(match), this, getTextBoundingRect($element[0], $element[0].selectionStart, $element[0].selectionEnd, false));
+      this.search(match)
+      updatePopOverPosition($element[0]);
     } else {
       this.cancel();
     }
@@ -446,7 +449,7 @@ angular.module('ui.mention')
   }
 
   function appendTemplate (choices, _this, coordinates) {
-    let html = '<ul ng-if="$mention.choices.length" class="dropdown">\
+    let html = '<ul class="dropdown">\
       <li ng-repeat="choice in $mention.choices" ng-class="{active:$mention.activeChoice==choice}">\
         <a ng-click="$mention.select(choice)">\
           {{choice.label}}\
@@ -455,9 +458,13 @@ angular.module('ui.mention')
     </ul>'
 
     let element = angular.element(html);
-    // if ($document[0].querySelector('.dropdown')) $document[0].querySelector('.dropdown');
     element.css({ display: "block", visibility: "visible", left: coordinates.left + 'px', top: coordinates.top + 'px', width: 0 });
     angular.element($document[0].querySelector('.mention-container')).append(element);
     _this.$compile(element)(_this.$scope);
+  }
+
+  function updatePopOverPosition (element) {
+    let coordinates =  getTextBoundingRect(element, element.selectionStart, element.selectionEnd, false)
+    angular.element($document[0].querySelector('.dropdown')).css({left: coordinates.left + 'px', top: coordinates.top + 'px'});
   }
 });
