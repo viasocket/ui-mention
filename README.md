@@ -26,7 +26,7 @@ For now, you should create a child-directive to customize (API probably going to
        * @return {string}              Human-readable string version of choice
        */
        uiMention.label = function(choice) {
-         return choice.first_name + " " + choice.last_name;
+         return choice.label;
        };
 
       /**
@@ -42,27 +42,20 @@ For now, you should create a child-directive to customize (API probably going to
   };
 });
 ```
-You have to build the HTML yourself:
+You have to build the HTML Like you can also use inputinstead of text area:
 ```html
-<div class="ui-mention-container">
-
-  <textarea ng-model="data" ui-mention my-mention></textarea>
-
-  <div class="ui-mention-highlight"></div>
-
-  <ul class="dropdown" ng-if="$mention.choices.length">
-    <li ng-repeat="choice in $mention.choices"
-      ng-class="{active:$mention.activeChoice==choice}"
-      ng-click="$mention.select(choice)">
-      {{::choice.first_name}} {{::choice.last_name}}
-    </li>
-  </ul>
-
+<div class="mention-container">
+  <textarea ui-mention my-mention
+    ng-model="post.message"
+    placeholder="Use $mention to trigger"
+    ng-trim="false"
+    ></textarea>
+  <div class="mention-highlight"></div>
 </div>
 ```
 And the CSS:
 ```scss
-.ui-mention-container {
+.mention-container {
   position: relative;
   [ui-mention] {
     min-height: 100px;
@@ -71,23 +64,23 @@ And the CSS:
     z-index: 2;
     box-sizing: content-box; // Prevent scrollbar for autogrow
   }
-  .ui-mention-highlight {
-      white-space: pre-wrap;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      color: rgba(0,0,0,0);
-      z-index: 1;
-      span {
-        border-radius: 2px;
-        background-color: lightblue;
-        border: 1px solid blue;
-        padding: 0 2px;
-        margin: -1px -3px;
-      }
+  .mention-highlight {
+    white-space: pre-wrap;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    color: rgba(0,0,0,0);
+    z-index: 1;
+    span {
+      border-radius: 2px;
+      background-color: lightblue;
+      border: 1px solid blue;
+      padding: 0 2px;
+      margin: -1px -3px;
+    }
   }
   .dropdown {
     position: absolute;
@@ -169,16 +162,16 @@ mention.findChoices = function(match) {
 
 Dropdown that list like it's hot:
 ```html
-<ul ng-if="$mention.choices.length" class="dropdown">
+<ul class="dropdown">
   <li ng-repeat="choice in choice" ng-click="$mention.select(choice)">
-    {{::choice.name}}
+    {{::choice.label}}
   </li>
 </ul>
 ```
 
 SPINNIES!
 ```html
-<ul ng-if="$mention.choices.length" class="dropdown">
+<ul class="dropdown">
   <li ng-show="$mention.loading">Hacking the gibson...</li>
   <li ng-repeat=...>...</li>
 </ul>
