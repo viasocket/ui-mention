@@ -383,22 +383,7 @@ angular.module('ui.mention')
       width = getInputCSS('width', true),
       height = getInputCSS('height', true);
 
-      // Styles to simulate a node in an input field
-      // use pre-wrap instead of wrap for white-space to support wrapping in textareas
-    let cssDefaultStyles = "white-space:pre-wrap;padding:0;margin:0;",
-      listOfModifiers = ['direction', 'font-family', 'font-size', 'font-size-adjust', 'font-variant', 'font-weight', 'font-style', 'letter-spacing', 'line-height', 'text-align', 'text-indent', 'text-transform', 'word-wrap', 'word-spacing'];
-
-    topPos += getInputCSS('padding-top', true);
-    topPos += getInputCSS('border-top-width', true);
-    leftPos += getInputCSS('padding-left', true);
-    leftPos += getInputCSS('border-left-width', true);
-    leftPos += 1; //Seems to be necessary
-
-    for (let i=0; i<listOfModifiers.length; i++) {
-      let property = listOfModifiers[i];
-      cssDefaultStyles += property + ':' + getInputCSS(property) +';';
-    }
-    // End of CSS variable checks
+    let cssDefaultStyles = "white-space:pre-wrap;padding:0;margin:0;";
 
     let text = input.value,
       textLen = text.length,
